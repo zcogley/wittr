@@ -1,5 +1,5 @@
 var staticCacheName = 'wittr-static-v2';
-
+// comment
 self.addEventListener('install', function(event) {
   event.waitUntil(
     caches.open(staticCacheName).then(function(cache) {
@@ -37,3 +37,7 @@ self.addEventListener('fetch', function(event) {
     })
   );
 });
+
+self.addEventListener('message', (event) => {
+    if(event.data.action === 'refresh') self.skipWaiting();
+       });
