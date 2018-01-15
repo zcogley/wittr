@@ -2,7 +2,9 @@ var staticCacheName = 'wittr-static-v2';
 
 self.addEventListener('install', function(event) {
   event.waitUntil(
+
     caches.open(staticCacheName).then(function(cache) {
+
       return cache.addAll([
         '/',
         'js/main.js',
@@ -17,6 +19,7 @@ self.addEventListener('install', function(event) {
 
 self.addEventListener('activate', function(event) {
   event.waitUntil(
+
     caches.keys().then(function(cacheNames) {
       return Promise.all(
         cacheNames.filter(function(cacheName) {
@@ -26,6 +29,9 @@ self.addEventListener('activate', function(event) {
           return caches.delete(cacheName);
         })
       );
+
+
+
     })
   );
 });
@@ -38,10 +44,4 @@ self.addEventListener('fetch', function(event) {
   );
 });
 
-// TODO: listen for the "message" event, and call
-// skipWaiting if you get the appropriate message
-self.addEventListener('message', function (event) {
-  if (event.data.action == 'skipWaiting') {
-    self.skipWaiting();
-  }
-})
+
