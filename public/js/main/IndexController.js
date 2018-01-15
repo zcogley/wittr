@@ -17,55 +17,54 @@ IndexController.prototype._registerServiceWorker = function() {
   var indexController = this;
 
   navigator.serviceWorker.register('/sw.js').then(function(reg) {
-    // Done: if there's no controller, this page wasn't loaded
-    // via a service worker, so they're looking at the latest version.
-    // In that case, exit early
+
     if (!navigator.serviceWorker.controller) {
-      //page didn't load with a service worker
-      console.log('no worker!');
       return;
     }
 
-    // Done: if there's an updated worker already waiting, call
-    // indexController._updateReady()
     if (reg.waiting) {
-      indexController._updateReady();
-      console.log('update ready');
+      indexController._updateReady(reg.waiting);
       return;
     }
 
-    // Done: if there's an updated worker installing, track its
-    // progress. If it becomes "installed", call
-    // indexController._updateReady()
     if (reg.installing) {
       indexController._trackInstalling(reg.installing);
       return;
     }
 
-    // Done: otherwise, listen for new installing workers arriving.
-    // If one arrives, track its progress.
-    // If it becomes "installed", call
-    // indexController._updateReady()
-    reg.addEventListerner('updatefound', function() {
-      indexController._trackInstalling(reg.installing);
-    })
 
+    reg.addEventListener('updatefound', function() {
+      indexController._trackInstalling(reg.installing);
+    });
   });
+
+  // TODO: listen for the controlling service worker changing
+  // and reload the page
+    navigator.serviceWorker.addEventListener('controllerchange', function () {
+      window.location.reload();
+    });
 };
 
-IndexController.prototype._trackInstalling = function (worker) {
+IndexController.prototype._trackInstalling = function(worker) {
   var indexController = this;
 
   worker.addEventListener('statechange', function() {
     if (worker.state == 'installed') {
       indexController._updateReady(worker);
     }
-  })
-}
+
+  });
+};
 
 IndexController.prototype._updateReady = function(worker) {
   var toast = this._toastsView.show("New version available", {
-    buttons: ['Update', Dismiss']
+    buttons: ['refresh', 'dismiss']
+  });
+
+  toast.answer.then(function(answer) {
+    if (answer != 'refresh') return;
+    // TODO: tell the service worker to skipWaiting
+    worker.postMessage({action: 'skipWaiting'});
   });
 };
 
