@@ -1,9 +1,11 @@
 var staticCacheName = 'wittr-static-v2';
 
+
 self.addEventListener('install', function(event) {
   event.waitUntil(
 
     caches.open(staticCacheName).then(function(cache) {
+
 
       return cache.addAll([
         '/',
@@ -29,7 +31,6 @@ self.addEventListener('activate', function(event) {
           return caches.delete(cacheName);
         })
       );
-
 
 
     })

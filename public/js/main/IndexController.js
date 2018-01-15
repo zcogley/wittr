@@ -17,6 +17,7 @@ IndexController.prototype._registerServiceWorker = function() {
   var indexController = this;
 
   navigator.serviceWorker.register('/sw.js').then(function(reg) {
+
     if (!navigator.serviceWorker.controller) {
       return;
     }
@@ -30,6 +31,7 @@ IndexController.prototype._registerServiceWorker = function() {
       indexController._trackInstalling(reg.installing);
       return;
     }
+
 
     reg.addEventListener('updatefound', function() {
       indexController._trackInstalling(reg.installing);
@@ -45,10 +47,12 @@ IndexController.prototype._registerServiceWorker = function() {
 
 IndexController.prototype._trackInstalling = function(worker) {
   var indexController = this;
+
   worker.addEventListener('statechange', function() {
     if (worker.state == 'installed') {
       indexController._updateReady(worker);
     }
+
   });
 };
 
