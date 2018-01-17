@@ -1,15 +1,21 @@
 import idb from 'idb';
 
-var dbPromise = idb.open('test-db', 3, function(upgradeDb) {
+var dbPromise = idb.open('test-db', 4, function(upgradeDb) {
   switch(upgradeDb.oldVersion) {
     case 0:
       var keyValStore = upgradeDb.createObjectStore('keyval');
       keyValStore.put("world", "hello");
+      // falls through
     case 1:
       upgradeDb.createObjectStore('people', { keyPath: 'name' });
+      // falls through
     case 2:
       var peopleStore = upgradeDb.transaction.objectStore('people');
       peopleStore.createIndex('animal', 'favoriteAnimal');
+      // falls through
+    case 3:
+      peopleStore = upgradeDb.transaction.objectStore('people');
+      peopleStore.createIndex('age', 'age');
   }
   // TODO: create an index on 'people' named 'age', ordered by 'age'
 });
@@ -88,3 +94,28 @@ dbPromise.then(function(db) {
 });
 
 // TODO: console.log all people ordered by age
+dbPromise.then(function(db) {
+  var tx = db.transaction('people');
+  var peopleStore = tx.objectStore('people');
+  var ageIndex = peopleStore.index('age');
+
+  return ageIndex.getAll();
+}).then(function(age) {
+  console.log('People by age:', age);
+});
+
+dbPromise.then(function(db) {
+  var tx = db.transaction('people');
+  var peopleStore = tx.objectStore('people');
+  var ageIndex = peopleStore.index('age');
+
+  return ageIndex.openCursor();
+}).then(function logPerson(cursor) {
+  if (!cursor) return;
+  console.log('Cursored at:', cursor.value.name);
+  // cursor.update(newValue) changes the value for that key
+  // cursor.delete() deletes the value at that key
+  return cursor.continue().then(logPerson);
+}).then(function () {
+  console.log('Done cursoring');
+});
