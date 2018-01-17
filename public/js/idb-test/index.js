@@ -40,6 +40,7 @@ dbPromise.then(function(db) {
 });
 
 dbPromise.then(function(db) {
+
   var tx = db.transaction('keyval', 'readwrite');
   var keyValStore = tx.objectStore('keyval');
   keyValStore.put('cat', 'favoriteAnimal');
@@ -118,4 +119,5 @@ dbPromise.then(function(db) {
   return cursor.continue().then(logPerson);
 }).then(function () {
   console.log('Done cursoring');
+
 });
