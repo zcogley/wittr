@@ -37,6 +37,7 @@ IndexController.prototype._registerServiceWorker = function() {
   var indexController = this;
 
   navigator.serviceWorker.register('/sw.js').then(function(reg) {
+
     if (!navigator.serviceWorker.controller) {
       return;
     }
@@ -51,10 +52,12 @@ IndexController.prototype._registerServiceWorker = function() {
       return;
     }
 
+
     reg.addEventListener('updatefound', function() {
       indexController._trackInstalling(reg.installing);
     });
   });
+
 
   // Ensure refresh is only called once.
   // This works around a bug in "force update on reload".
@@ -64,14 +67,17 @@ IndexController.prototype._registerServiceWorker = function() {
     window.location.reload();
     refreshing = true;
   });
+
 };
 
 IndexController.prototype._trackInstalling = function(worker) {
   var indexController = this;
+
   worker.addEventListener('statechange', function() {
     if (worker.state == 'installed') {
       indexController._updateReady(worker);
     }
+
   });
 };
 
@@ -82,6 +88,9 @@ IndexController.prototype._updateReady = function(worker) {
 
   toast.answer.then(function(answer) {
     if (answer != 'refresh') return;
+
+    // TODO: tell the service worker to skipWaiting
+
     worker.postMessage({action: 'skipWaiting'});
   });
 };
